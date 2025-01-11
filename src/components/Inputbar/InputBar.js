@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import "./InputBar.css";
 import { FaTrash, FaBell, FaEdit } from 'react-icons/fa';
 
@@ -37,6 +37,27 @@ function InputBar({ onAddTask }) {
     const [selectedPreset, setSelectedPreset] = useState("");
 
     const inputRef = useRef(null);
+    useEffect(() => {
+        if (taskTitle) {
+            setTaskText(taskTitle);
+            setTimeout(() => inputRef.current?.focus(), 100);
+        }
+    }, [taskTitle]);
+
+    // Add message listener for context menu
+    useEffect(() => {
+        const messageListener = (message) => {
+            if (message.type === "ADD_TO_INPUT") {
+                setTaskText(message.text);
+                setTimeout(() => inputRef.current?.focus(), 100);
+            }
+        };
+
+        chrome.runtime.onMessage.addListener(messageListener);
+        return () => {
+            chrome.runtime.onMessage.removeListener(messageListener);
+        };
+    }, []);
 
     const handleAdd = () => {
         onAddTask(taskText, dueDate, dueTime, description,isReminder);
@@ -74,6 +95,15 @@ function InputBar({ onAddTask }) {
         setSelectedPreset(value);
         setDueDate(value.split(" ")[0]);
         setDueTime(value.split(" ")[1]);
+    };
+
+    const handlePaste = async (e) => {
+        try {
+            const text = await navigator.clipboard.readText();
+            setTaskText(text);
+        } catch (err) {
+            console.error('Failed to read clipboard:', err);
+        }
     };
 
     return (
@@ -157,4 +187,5 @@ function InputBar({ onAddTask }) {
     );
 }
 
-export default InputBar;
+
+  export default InputBar;

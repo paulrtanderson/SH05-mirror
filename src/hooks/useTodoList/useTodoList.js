@@ -78,3 +78,11 @@ export function useTodoList() {
 
     return { tasks, addTask, deleteTask,toggleReminder, saveTasks, loadTasks };
 }
+useEffect(() => {
+    chrome.runtime.onMessage.addListener((message) => {
+      if (message.action === "addTask" && message.text) {
+        addTask(message.text);
+      }
+    });
+  }, []);
+  
