@@ -1,18 +1,19 @@
 {
   "manifest_version": 3,
-  "name": "Hawk - Page Indexer",
-  "description": "An extension that indexes web pages and supports parameter experiments.",
-  "version": "1.1.0",
-  "permissions": [
-    "activeTab",
-    "storage",
-    "notifications",
-    "unlimitedStorage"
-  ],
-  "host_permissions": [
-    "https://*/*",
-    "http://*/*"
-  ],
+    "name": "HAWK 2 - Page Indexer and Productivity tool",
+    "version": "1.0",
+    "description": "A React Chrome Extension",
+    "permissions": [
+      "activeTab",
+      "tabs",
+      "storage",
+      "unlimitedStorage",
+      "notifications",
+      "alarms",
+      "tabs",
+      "sidePanel"
+    ],
+
   "background": {
     "service_worker": "background.js"
   },
