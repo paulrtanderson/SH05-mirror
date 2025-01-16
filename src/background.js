@@ -1,5 +1,8 @@
-import { BM25F } from './assets/wink-bm25-text-search.js';
-import MiniSearch from './assets/minisearch.min.js';
+// 如果使用 npm 包，请先安装它们：
+// npm install wink-bm25-text-search minisearch
+
+import { BM25F } from 'wink-bm25-text-search'; // 从 npm 包中导入
+import MiniSearch from 'minisearch'; // 从 npm 包中导入
 
 const TITLE_BOOST = 3;
 const MIN_SEARCH_TERM_LENGTH = 3;
@@ -11,18 +14,20 @@ let engine;
 let runningEngine;
 let miniSearch;
 
+// 创建 MiniSearch 引擎
 function createMiniSearch(boostTitle = 3, fuzzy = 0.2, prefix = true) {
   return new MiniSearch({
-    fields: ['title', 'body'],
-    storeFields: ['url', 'title'],
+    fields: ['title', 'body'], // 搜索字段
+    storeFields: ['url', 'title'], // 存储字段
     searchOptions: {
-      boost: { title: boostTitle },
-      fuzzy: fuzzy,
-      prefix: prefix,
+      boost: { title: boostTitle }, // 标题加权
+      fuzzy: fuzzy, // 模糊搜索
+      prefix: prefix, // 前缀匹配
     },
   });
 }
 
+// 设置 BM25F 引擎
 async function setupBM25F(titleWeight = 20, bodyWeight = 1) {
   engine = new BM25F();
   engine.defineConfig({ fldWeights: { title: titleWeight, body: bodyWeight } });
@@ -34,6 +39,7 @@ async function setupBM25F(titleWeight = 20, bodyWeight = 1) {
   }
 }
 
+// 更新索引
 async function updateIndex(page) {
   const result = await chrome.storage.local.get(['indexed']);
   const indexed = result.indexed || { corpus: [] };
@@ -42,7 +48,6 @@ async function updateIndex(page) {
     indexed.corpus.push(page);
     docs.push(page);
 
-    
     miniSearch.add(page);
     engine.addDoc(page, docs.length);
 
@@ -58,6 +63,7 @@ async function updateIndex(page) {
   }
 }
 
+// 搜索功能
 function search(query) {
   let results = [];
 
@@ -75,6 +81,7 @@ function search(query) {
   return results.slice(0, 10);
 }
 
+// 测试搜索引擎配置
 async function experimentSearchEngines() {
   const miniSearchConfigs = [
     { boostTitle: 3, fuzzy: 0.2, prefix: true },
@@ -113,6 +120,7 @@ async function experimentSearchEngines() {
   }
 }
 
+// 监听消息
 chrome.runtime.onMessage.addListener(async (request) => {
   if (request.action === 'sendVisibleTextContent') {
     const page = {
@@ -129,6 +137,7 @@ chrome.runtime.onMessage.addListener(async (request) => {
   }
 });
 
+// 处理 Omnibox 输入
 chrome.omnibox.onInputChanged.addListener((text, suggest) => {
   console.log('Search triggered with input:', text);
   const results = search(text);
@@ -144,14 +153,15 @@ chrome.omnibox.onInputEntered.addListener((text) => {
   chrome.tabs.create({ url: text });
 });
 
+// 初始化
 async function initialize() {
-  miniSearch = createMiniSearch(TITLE_BOOST, DEFAULT_WEIGHT, true); 
+  miniSearch = createMiniSearch(TITLE_BOOST, DEFAULT_WEIGHT, true);
   const result = await chrome.storage.local.get(['indexed']);
   const indexed = result.indexed || { corpus: [] };
 
   docs = indexed.corpus || [];
   miniSearch.addAll(docs);
-  await setupBM25F(20, 1); 
+  await setupBM25F(20, 1);
 }
 
 initialize().then(() => {
