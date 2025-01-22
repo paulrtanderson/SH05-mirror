@@ -1,54 +1,201 @@
-import React from 'react';
-import { FaTrash, FaBell, FaEdit } from 'react-icons/fa';
+import React, { useState, useRef, useEffect } from "react";
+import { Card, Row, Col, Form, Collapse, Button } from "react-bootstrap";
+import "./TodoItem.css";
+import { FaTrashAlt } from "react-icons/fa";
 
-function TodoItem({ task, onDelete, onToggleReminder, onEdit }) {
-    return (
-        <li className="todo-item list-group-item d-flex align-items-center justify-content-between shadow-sm rounded mb-2 p-3">
-            <div className="task-info d-flex flex-column">
-                <h5 className="task-text mb-1 d-flex align-items-center">
+const isOverdue = (dueDate) => new Date(dueDate) < new Date();
+
+const formatDate = (date) => {
+  const now = new Date();
+  const isToday = date.toDateString() === now.toDateString();
+
+  if (isToday) {
+    return date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } else {
+    return date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+    });
+  }
+};
+
+function TodoItem({ task, onDelete, onToggleReminder, onUpdateTask }) {
+  const [isDescriptionVisible, setIsDescriptionVisible] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [newText, setNewText] = useState(task.text);
+  const [isChecked, setIsChecked] = useState(false);
+
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleDoubleClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleChange = (e) => {
+    setNewText(e.target.value);
+  };
+
+  const handleBlur = () => {
+    setIsEditing(false);
+    onUpdateTask(task.id, newText);
+  };
+
+  const handleClickOutside = (event) => {
+    if (cardRef.current && !cardRef.current.contains(event.target)) {
+      setIsDescriptionVisible(false);
+    }
+  };
+
+  const handleDescriptionToggle = () => {
+    setIsDescriptionVisible(true);
+  };
+
+  const handleCheckboxChange = () => {
+    setIsChecked(!isChecked);
+  };
+
+  return (
+    <Card
+      ref={cardRef}
+      className={`mt-2 ${
+        isDescriptionVisible ? "highlighted-border" : "default-border"
+      }`}
+      onClick={handleDescriptionToggle}
+      style={{
+        cursor: "pointer",
+      }}
+    >
+      <Card.Body style={{ paddingTop: "0.5rem", paddingBottom: "0.5rem" }}>
+        <Row>
+          <Col xs="auto" className="d-flex align-items-center">
+            <Form.Check
+              type="checkbox"
+              onChange={handleCheckboxChange}
+              onClick={(e) => e.stopPropagation()}
+              checked={isChecked}
+              className="custom-checkbox"
+              style={{
+                transform: "scale(1.5)",
+                cursor: "pointer",
+              }}
+            />
+          </Col>
+          <Col>
+            <Row>
+              <Col
+                xs
+                className="d-flex align-items-center"
+                style={{ wordBreak: "break-word" }}
+              >
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={newText}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    autoFocus
+                    style={{
+                      border: "none",
+                      background: "none",
+                      width: "100%",
+                      padding: 0,
+                      margin: 0,
+                      outline: "none",
+                      boxShadow: "none",
+                    }}
+                  />
+                ) : (
+                  <div
+                    onDoubleClick={handleDoubleClick}
+                    style={{
+                      textDecoration: isChecked ? "line-through" : "none",
+                    }}
+                  >
                     {task.text}
-                    {task.reminder && (
-                        <FaBell className="text-warning ms-2" title="Reminder Set" />
-                    )}
-                </h5>
-                {task.description && <p className="text-muted small mb-1">{task.description}</p>}
-                {task.due && task.due instanceof Date && (
-                    <small className="text-muted">
-                        Due: {task.due.toLocaleString()}
-                    </small>
+                  </div>
                 )}
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                {task.due && (
+                  <div
+                    className={`due-date ${
+                      isOverdue(task.due) ? "overdue" : ""
+                    }`}
+                  >
+                    {formatDate(new Date(task.due))}
+                  </div>
+                )}
+              </Col>
+            </Row>
+          </Col>
+
+          {/* Bell Icon */}
+          <Col xs="auto" className="d-flex align-items-center">
+            <Button
+              variant="link"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent description toggle
+                onToggleReminder(task.id);
+              }}
+              style={{ padding: 0 }}
+              aria-label="Toggle Reminder"
+            >
+              <img
+                src={
+                  task.reminder
+                    ? `/vector_arts/checked_bell.png`
+                    : `/vector_arts/bell.png`
+                }
+                alt="Reminder"
+                style={{ width: "20px", height: "20px" }}
+              />
+            </Button>
+          </Col>
+          <Col xs="auto" className="d-flex align-items-center">
+            <Button
+              variant="link"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent description toggle
+                onDelete(task.id);
+              }}
+              style={{ padding: 0 }}
+            >
+              <FaTrashAlt
+                style={{
+                  width: "20px",
+                  height: "20px",
+                  color: "#dc3545",
+                }}
+                aria-label="Delete Task"
+              />
+            </Button>
+          </Col>
+        </Row>
+        {/* Collapsible Description */}
+        {task.description && (
+          <Collapse in={isDescriptionVisible}>
+            <div className="mt-2">
+              <Card.Text style={{ fontSize: "0.9rem", color: "#6c757d" }}>
+                {task.description}
+              </Card.Text>
             </div>
-
-            <div className="task-actions d-flex align-items-center gap-2">
-                {/* Reminder Icon */}
-                <button
-                    className="btn btn-outline-secondary btn-sm"
-                    title="Toggle Reminder"
-                    onClick={() => onToggleReminder(task.id)}
-                >
-                    <FaBell className={task.reminder ? "text-warning" : ""} />
-                </button>
-
-                {/* Edit Icon */}
-                <button
-                    className="btn btn-outline-secondary btn-sm"
-                    title="Edit Task"
-                    onClick={() => onEdit(task.id)}
-                >
-                    <FaEdit />
-                </button>
-
-                {/* Delete Icon */}
-                <button
-                    className="btn btn-outline-danger btn-sm"
-                    title="Delete Task"
-                    onClick={() => onDelete(task.id)}
-                >
-                    <FaTrash />
-                </button>
-            </div>
-        </li>
-    );
+          </Collapse>
+        )}
+      </Card.Body>
+    </Card>
+  );
 }
 
 export default TodoItem;

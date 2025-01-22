@@ -19,6 +19,8 @@ install_dependencies:
 run_tests:
   stage: test
   image: node:18
+  variables:
+    NODE_ENV: test
   script:
     - npm install --include=dev
     - npm test

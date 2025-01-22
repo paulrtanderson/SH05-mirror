@@ -53,16 +53,37 @@ body {
     box-shadow: 0 0 5px rgba(247, 143, 30, 0.5);
 }
 
-.task-input::placeholder, 
-.task-textarea::placeholder {
+.task-input::placeholder {
     color: #b0b0b0;
     font-size: 18px;
 }
 
 .task-textarea {
-    height: 70px;
+    width: 100%;
+    font-family: 'Roboto', Arial, sans-serif;
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    background-color: #ffffff;
+    color: #717171; /* Same color as task title input */
+    border: 3px solid #ffffff;
+    border-radius: 4px;
+    font-size: 16px; /* Smaller font size */
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
     resize: none;
-}
+    overflow: hidden;
+  }
+  
+  .task-textarea:focus {
+    border-color: #f78f1e;
+    box-shadow: 0 0 5px rgba(247, 143, 30, 0.5);
+  }
+  
+  .task-textarea::placeholder {
+    color: #b0b0b0;
+    font-size: 16px; /* Smaller font size */
+  }
 
 .preset-dates {
     display: flex;
@@ -94,7 +115,7 @@ body {
 }
 
 .preset-date-btn {
-    padding: 8px 20px;
+    padding: 8px 12px;
     background-color: #ffffff;
     color: #ffad54;
     border: 2px solid #ffad54;

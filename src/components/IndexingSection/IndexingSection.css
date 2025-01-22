@@ -1,0 +1,11 @@
+.subnav-link {
+    color: rgb(86, 86, 86) !important;
+    padding: 0.5vw 2vw !important; /* Adjust padding */
+    margin: 0 1vw !important; /* Adjust margin */
+    font-size: clamp(8px,4vw,16px) !important; /* Adjust font size */
+}
+  
+  .subnav-link.active {
+    color: #ffad54 !important;
+  }
+  

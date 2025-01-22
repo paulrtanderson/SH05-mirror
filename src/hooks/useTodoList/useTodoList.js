@@ -8,7 +8,7 @@ export function useTodoList() {
             console.log("the tasks have updated, Tasks updated:", tasks);
             saveTasks(); // Save tasks whenever `tasks` updates 
         }    
-    }, [tasks]);
+    }, [tasks,tasksLoaded]);
     
     useEffect(() => {
         loadTasks();
@@ -22,7 +22,7 @@ export function useTodoList() {
             // Combine dueDate and dueTime into a Date object
             due = new Date(`${dueDate}T${dueTime}`);
         }
-
+        // description += "This is a long ish test description that should be able to be seen when the user clicks on the task"
         const newTask = {
             id: Date.now(),
             text: taskText,
@@ -43,6 +43,12 @@ export function useTodoList() {
             task.id === taskId ? { ...task, reminder: !task.reminder } : task
         ));
     };
+
+    const updateTask = (taskId, newText) => {
+        setTasks(tasks.map(task =>
+          task.id === taskId ? { ...task, text: newText } : task
+        ));
+      };
 
     const saveTasks = () => {
         console.log("saving tasks to chrome local storage")
@@ -72,8 +78,9 @@ export function useTodoList() {
                 // console.log("Deserialized tasks:", deserializedTasks); // Log the deserialized tasks
                 setTasks(deserializedTasks);
             }
+            setTasksLoaded(true);
         });
-        setTasksLoaded(true);
+        
     };
 
     return { tasks, addTask, deleteTask,toggleReminder, saveTasks, loadTasks };

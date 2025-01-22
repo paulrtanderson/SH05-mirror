@@ -1,0 +1,37 @@
+.due-date {
+    font-size: 0.8rem;
+    color: #6c757d; /* Default gray */
+  }
+  
+.due-date.overdue {
+color: red;
+}
+  
+.highlighted-border {
+    border-left: 4px solid #ffad54 !important; /* Highlighted border color */
+}
+
+.default-border {
+    border-left: 4px solid #ccc !important; /* Default card border color */
+  }
+
+  /* Change the border color and checked state color */
+.custom-checkbox input[type="checkbox"] {
+    accent-color: #ffad54; /* Modern browsers support */
+  }
+  
+  .custom-checkbox input[type="checkbox"]:focus {
+    box-shadow: 0 0 0 0.25rem rgba(255, 173, 84, 0.5); /* Add a focus ring in your custom color */
+  }
+  
+  .custom-checkbox input[type="checkbox"]:checked {
+    background-color: #ffad54;
+    border-color: #ffad54;
+  }
+  
+  /* Optional: Add custom hover effects */
+  .custom-checkbox input[type="checkbox"]:hover {
+    cursor: pointer;
+    filter: brightness(0.9);
+  }
+  
