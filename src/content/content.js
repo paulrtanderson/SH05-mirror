@@ -1,18 +1,12 @@
 import { checkWhitelist } from "../utils/WhitelistChecker.js";
 
 console.log("Content script loaded.");
-// Cached whitelist
-let cachedWhitelist = {
-  sites: [],
-  urls: [],
-  stringMatches: [],
-  regex: []
-};
+let cachedWhitelist = { sites: [], urls: [], stringMatches: [], regex: [] };
 
-// Debounce delay (in milliseconds)
+// Debounce delay (ms)
 const DEBOUNCE_DELAY = 10000;
 
-// Debounce utility to limit frequent calls
+
 function debounce(func, delay) {
   let timeout;
   return function (...args) {
@@ -21,19 +15,16 @@ function debounce(func, delay) {
   };
 }
 
-// MutationObserver variable
 let observer = null;
 
-// Utility to manage the observer
 async function manageObserver() {
   const currentURL = window.location.href;
   const isWhitelisted = await checkWhitelist(currentURL, cachedWhitelist);
 
   if (isWhitelisted) {
     console.log("Page is whitelisted. Starting observer...");
-    // If not already observing, set up the observer
+    
     if (!observer) {
-        console.log("Setting up observer...");
       observer = new MutationObserver(
         debounce(async () => {
           console.log("DOM mutated, re-indexing...");
@@ -47,12 +38,10 @@ async function manageObserver() {
         characterData: true
       });
 
-      // Send initial page data
       await sendPageData();
     }
   } else {
     console.log("Page is not whitelisted. Stopping observer...");
-    // Disconnect observer if it exists
     if (observer) {
       observer.disconnect();
       observer = null;
@@ -60,48 +49,32 @@ async function manageObserver() {
   }
 }
 
-// Load whitelist from storage on script load
-chrome.storage.local.get(
-  ["allowedSites", "allowedURLs", "allowedStringMatches", "allowedRegex"],
-  (result) => {
-    cachedWhitelist.sites = result.allowedSites || [];
-    cachedWhitelist.urls = result.allowedURLs || [];
-    cachedWhitelist.stringMatches = result.allowedStringMatches || [];
-    cachedWhitelist.regex = result.allowedRegex || [];
-
-    // Check if the current page is whitelisted and manage the observer
-    manageObserver();
-  }
-);
-
-// Update cache and recheck observer when the whitelist changes
-chrome.storage.onChanged.addListener((changes, namespace) => {
-  if (namespace === "local") {
-    if (changes.allowedSites) cachedWhitelist.sites = changes.allowedSites.newValue || [];
-    if (changes.allowedURLs) cachedWhitelist.urls = changes.allowedURLs.newValue || [];
-    if (changes.allowedStringMatches) cachedWhitelist.stringMatches = changes.allowedStringMatches.newValue || [];
-    if (changes.allowedRegex) cachedWhitelist.regex = changes.allowedRegex.newValue || [];
-
-    // Recheck if the current page is whitelisted
-    manageObserver();
+chrome.storage.local.get("lastIndexedPage", (data) => {
+  if (data.lastIndexedPage) {
+    console.log("Backup: Restoring last indexed page", data.lastIndexedPage);
+    chrome.runtime.sendMessage({
+      action: "indexPage",
+      url: data.lastIndexedPage.url,
+      title: data.lastIndexedPage.title,
+      content: data.lastIndexedPage.content
+    });
   }
 });
 
-// Function to send page data
 async function sendPageData() {
-    console.log("Sending page data...");
+  console.log("Sending page data...");
   const currentURL = window.location.href;
   const currentTitle = document.title;
+  const pageContent = document.body.innerText;
 
   const isWhitelisted = await checkWhitelist(currentURL, cachedWhitelist);
-
   if (isWhitelisted) {
-    const pageContent = document.body.innerText;
-    chrome.runtime.sendMessage({
-      action: "indexPage",
-      url: currentURL,
-      title: currentTitle,
-      content: pageContent
-    });
+    chrome.runtime.sendMessage(
+      { action: "indexPage", url: currentURL, title: currentTitle, content: pageContent },
+      () => {
+        chrome.storage.local.set({ lastIndexedPage: { url: currentURL, title: currentTitle, content: pageContent } }, 
+        () => console.log("Backup: Indexed page data saved."));
+      }
+    );
   }
 }
