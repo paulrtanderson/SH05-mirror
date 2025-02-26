@@ -2,12 +2,14 @@ import MiniSearch from "minisearch";
 import { encode } from "he";
 
 const indexDescriptor = {
-  fields: ["title", "content"],
-  storeFields: ["title"],
-  idField: "id",
+  fields: ["title", "content"], // Fields to index
+  storeFields: ["title"], // Fields to return in search results
+  idField: "id", // Field for unique identifier
+
   searchOptions: {
-    boost: { title: 2 },
-    fuzzy: 0.2,
+    boost: { title: 2 }, // Give higher weight to title matches
+    fuzzy: 0.2, // Allow slight spelling variations
+
   },
 };
 
@@ -25,17 +27,31 @@ function removeAnchorLink(url) {
 let miniSearch = new MiniSearch(indexDescriptor);
 
 chrome.runtime.onInstalled.addListener(() => {
-  // Set panel behavior
-  chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(console.error);
+  chrome.sidePanel
+    .setPanelBehavior({ openPanelOnActionClick: true })
+    .catch((error) => console.error(error));
 
-  // Initialize storage with default values
-  chrome.storage.local.set({
-    allowedSites: [],
-    allowedURLs: [],
-    allowedStringMatches: [],
-    allowedRegex: defaultRegexList,
-    allLastTitles: {},
-  });
+  chrome.storage.local.set({ allowedSites: [] }, () => {});
+
+  chrome.storage.local.set({ allowedURLs: [] }, () => {});
+
+  chrome.storage.local.set({ allowedStringMatches: [] }, () => {});
+
+  chrome.storage.local.set({ allowedRegex: defaultRegexList }, () => {});
+
+  chrome.storage.local.set({ allLastTitles: {} }, () => {});
+
+  // chrome.storage.local.set({ pageIndex: JSON.stringify(miniSearch) }, () => {});
+
+});
+
+
+chrome.storage.local.get("pageIndex", (data) => {
+  if (data.pageIndex) {
+    miniSearch = MiniSearch.loadJSON(data.pageIndex,indexDescriptor);
+  }
+});
+
 
   // Attempt to load the page index from storage
   chrome.storage.local.get("pageIndex", (data) => {
@@ -50,7 +66,6 @@ chrome.runtime.onInstalled.addListener(() => {
     title: "Add Task",
     contexts: ["selection"],
   });
-});
 
 // Handle omnibox input changes
 chrome.omnibox.onInputChanged.addListener((text, suggest) => {
