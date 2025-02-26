@@ -1,12 +1,18 @@
 import { checkWhitelist } from "../utils/WhitelistChecker.js";
 
 console.log("Content script loaded.");
-let cachedWhitelist = { sites: [], urls: [], stringMatches: [], regex: [] };
+// Cached whitelist
+let cachedWhitelist = {
+  sites: [],
+  urls: [],
+  stringMatches: [],
+  regex: []
+};
 
-// Debounce delay (ms)
+// Debounce delay (in milliseconds)
 const DEBOUNCE_DELAY = 10000;
 
-
+// Debounce utility to limit frequent calls
 function debounce(func, delay) {
   let timeout;
   return function (...args) {
@@ -14,6 +20,7 @@ function debounce(func, delay) {
     timeout = setTimeout(() => func.apply(this, args), delay);
   };
 }
+
 
 let observer = null;
 
