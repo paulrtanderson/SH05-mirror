@@ -13,7 +13,6 @@ import "./Sidebar.css";
 function Sidebar() {
   const [activeSection, setActiveSection] = useState("tasks");
 
-  // 备份数据
   function exportBackup() {
     chrome.storage.local.get(null, (data) => {
       const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
@@ -27,7 +26,7 @@ function Sidebar() {
     });
   }
 
-  // 恢复数据
+
   function importBackup(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -86,7 +85,7 @@ function Sidebar() {
       {activeSection === "settings" && (
         <div>
           <h5>Backup & Restore</h5>
-          <Button onClick={exportBackup} variant="primary" className="m-2">导出数据</Button>
+          <Button onClick={exportBackup} variant="primary" className="m-2">export data</Button>
           <input type="file" onChange={importBackup} className="m-2" />
         </div>
       )}
