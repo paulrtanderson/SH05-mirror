@@ -12,23 +12,27 @@ const IndexingSection = () => {
     setAllowedSites, setAllowedRegex, setAllowedURLs, setAllowedStringMatches
   } = useIndexMatching();
 
-  useEffect(() => {
-    chrome.storage.local.get(["allowedSites", "allowedURLs", "allowedRegex", "allowedStringMatches"], (data) => {
-      if (data.allowedSites) setAllowedSites(data.allowedSites);
-      if (data.allowedURLs) setAllowedURLs(data.allowedURLs);
-      if (data.allowedRegex) setAllowedRegex(data.allowedRegex);
-      if (data.allowedStringMatches) setAllowedStringMatches(data.allowedStringMatches);
-      console.log("Backup: Indexing settings restored.");
-    });
-  }, []);
+  const sections = [
+    { key: "allowedSites", label: "Sites" },
+    { key: "allowedUrls", label: "URLs" },
+    { key: "stringmatches", label: "String Matches" },
+    { key: "regex", label: "RegEx" },
+  ];
 
-  useEffect(() => {
-    chrome.storage.local.set({
-      allowedSites, allowedURLs, allowedRegex, allowedStringMatches
-    }, () => {
-      console.log("Backup: Indexing settings saved.");
-    });
-  }, [allowedSites, allowedURLs, allowedRegex, allowedStringMatches]);
+  const sectionFunctions = {
+    allowedSites: { add: addSite, remove: removeSite, update: updateSite },
+    regex: { add: addRegex, remove: removeRegex, update: updateRegex },
+    allowedURLs: { add: addUrl, remove: removeUrl, update: updateUrl },
+    stringmatches: { add: addStringMatch, remove: removeStringMatch, update: updateStringMatch }
+  };
+
+  const sectionItems = {
+    allowedSites:allowedSites,
+    regex: allowedRegex,
+    allowedURLs:allowedURLs,
+    stringmatches: allowedStringMatches
+  };
+
 
   return (
     <Container className="indexing-section">
