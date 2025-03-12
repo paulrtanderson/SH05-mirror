@@ -213,8 +213,10 @@ describe('Background Integration Tests', () => {
   });
   
   test('should handle indexPage error case', async () => {
-    // Mock an error in the handleIndexPage function
-    searchEngine.handleIndexPage.mockRejectedValueOnce(new Error("Indexing failed"));
+    // Mock a synchronous error in the handleIndexPage function
+    searchEngine.handleIndexPage.mockImplementation(() => {
+      throw new Error("Indexing failed");
+    });
     
     const request = {
       action: "indexPage",
@@ -230,8 +232,6 @@ describe('Background Integration Tests', () => {
     // Call the message listener and get the result
     const result = global.messageListener(request, sender, sendResponse);
     
-    // Add a small delay to allow the Promise rejection to be processed
-    await new Promise(resolve => setTimeout(resolve, 10));
     
     // Check if the error was logged
     expect(consoleSpy).toHaveBeenCalled();
