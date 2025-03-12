@@ -79,3 +79,8 @@ export async function loadSearchIndex() {
 export function getMiniSearch() {
   return miniSearch;
 }
+
+// Add at the end of the file
+export function _resetMiniSearchForTests(mockInstance) {
+  miniSearch = mockInstance;
+}
