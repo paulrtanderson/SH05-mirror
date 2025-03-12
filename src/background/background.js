@@ -2,7 +2,8 @@ import { initializeOmnibox } from "./omnibox";
 import { initializeStorage } from "./storageManager";
 import { createContextMenu, setupContextMenuListeners } from "./contextMenu";
 import { loadSearchIndex, handleIndexPage } from "./searchEngine";
-import { handleAddTaskNotification, handleDeleteTaskNotification, handleUpdateTaskNotification, handleBackupImported, addAlarmListeners } from "./notifications";
+import { handleAddTaskNotification, handleDeleteTaskNotification, 
+         handleUpdateTaskNotification, handleBackupImported, addAlarmListeners } from "./notifications";
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.sidePanel
@@ -13,11 +14,18 @@ chrome.runtime.onInstalled.addListener(() => {
   initializeStorage();
 });
 
-await loadSearchIndex();
-initializeOmnibox();
-setupContextMenuListeners();
-
-
+// Wrap async operations in an IIFE
+(async function() {
+  try {
+    await loadSearchIndex();
+  } catch (error) {
+    console.error("Error loading search index:", error);
+  }
+  
+  initializeOmnibox();
+  setupContextMenuListeners();
+  addAlarmListeners();
+})();
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "indexPage") {
@@ -53,5 +61,3 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true; // Required for asynchronous sendResponse
   }
 });
-
-addAlarmListeners();
