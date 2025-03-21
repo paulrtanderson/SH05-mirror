@@ -89,7 +89,8 @@ const IndexingSection = () => {
       </div>
 
       <div className="recover-button-container">
-        <Button data-testid="recover-button" onClick={handleOpenRecoverPage} className="recover-button">
+        <Button data-testid="recover-button" onClick={handleOpenRecoverPage} data-tooltip= "Recover indexed links"
+                data-tooltip-position="top" className="recover-button">
           <MdRestore size={24} />
         </Button>
       </div>

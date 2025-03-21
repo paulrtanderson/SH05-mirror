@@ -65,6 +65,20 @@ function InputBar({ onAddTask }) {
     }
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Enter" && taskText.trim() !== "") {
+        e.preventDefault();
+        handleAdd();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [taskText, hasReminder, description, selectedDueDate]);
+
   const handleReminderClick = (event) => {
     event.stopPropagation();
     setHasReminder(!hasReminder);
@@ -89,7 +103,6 @@ function InputBar({ onAddTask }) {
           left: rect.left + window.scrollX,
         };
         
-        // Toggle overlay: close if open, open if closed
         if (showDueOverlay) {
           setShowDueOverlay(false);
         } else {
@@ -162,12 +175,7 @@ function InputBar({ onAddTask }) {
   return (
     <div className="page-border">
       <div className="input-bar task-container p-2">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleAdd();
-          }}
-        >
+        <form onSubmit={(e) => e.preventDefault()}>
           <input
             type="text"
             value={taskText}
@@ -205,7 +213,6 @@ function InputBar({ onAddTask }) {
                   type="button"
                   onMouseDown={handleDueDateMouseDown}
                   onMouseUp={handleDueDateMouseUp}
-                  // aria-label="Due date"
                   data-testid="due-date-button"
                 >
                   {renderCalendarIconWithDate()}
@@ -220,7 +227,7 @@ function InputBar({ onAddTask }) {
                 )}
               </div>
 
-              <button className="change-btn" type="submit">
+              <button className="change-btn" type="button" onClick={handleAdd}>
                 Add Task
               </button>
             </div>

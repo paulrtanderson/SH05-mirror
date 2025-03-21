@@ -137,8 +137,8 @@
 }
 
 .react-calendar__tile--now {
-  background: var(--light-primary-color);
-  color: var(--white-color);
+  background: var(--transparent-blue) !important;
+  color: #fff!important;
   border-radius: 50%;
 }
 
@@ -372,4 +372,3 @@
   background-color: var(--secondary-color);
   border-color: var(--secondary-color);
 }
-

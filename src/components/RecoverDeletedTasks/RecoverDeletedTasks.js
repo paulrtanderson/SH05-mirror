@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { Card, Row, Col, Form, Collapse, Button, Nav } from "react-bootstrap";
 import { FaRedo } from "react-icons/fa";
 import { IoChevronBackOutline } from "react-icons/io5";
-import "../tooltip";
+import "../tooltip"; // Assuming this contains the tooltip CSS logic
 import "../base.css";
 import "./RecoverDeletedTasks.css";
 
@@ -13,27 +13,24 @@ const RecoverDeletedTasks = ({
   onRecoverCompleted,
   onBack,
 }) => {
-  const [activeSection, setActiveSection] = useState("completed"); // Default to "Completed Tasks"
-
+  const [activeSection, setActiveSection] = useState("completed");
   const safeDeletedTasks = Array.isArray(deletedTasks) ? deletedTasks : [];
   const safeCompletedTasks = Array.isArray(completedTasks) ? completedTasks.filter((task) => !task.hidden) : [];
   const currentItems = activeSection === "completed" ? safeCompletedTasks : safeDeletedTasks;
 
   const sections = {
-    completed: { label: "Completed Tasks" }, 
+    completed: { label: "Completed Tasks" },
     deleted: { label: "Deleted Tasks" },
   };
-  console.log("RecoverDeletedTasks - received deletedTasks:", deletedTasks);
-
-  // console.log(`RecoverDeletedTasks - Deleted Tasks:`, safeDeletedTasks);
-  // console.log(`RecoverDeletedTasks - Completed Tasks:`, safeCompletedTasks);
 
   const handleRecover = (index) => {
-    if (activeSection === "completed") {
-      onRecoverCompleted(index);
-    } else {
-      onRecoverDeleted(index);
-    }
+    setTimeout(() => {
+      if (activeSection === "completed") {
+        onRecoverCompleted(index);
+      } else {
+        onRecoverDeleted(index);
+      }
+    }, 500);
   };
 
   const formatDateTime = (date) => {
@@ -58,7 +55,13 @@ const RecoverDeletedTasks = ({
     const renderDueDate = () => (
       <div
         ref={dueDateRef}
-        className={`due-date-text ${!task.dueDate ? "no-due-date" : new Date(task.dueDate) < new Date() ? "overdue" : "due-date-set"}`}
+        className={`due-date-text ${
+          !task.dueDate
+            ? "no-due-date"
+            : new Date(task.dueDate) < new Date()
+            ? "overdue"
+            : "due-date-set"
+        }`}
         data-tooltip="Due Date"
         data-tooltip-position="top"
       >
@@ -68,7 +71,9 @@ const RecoverDeletedTasks = ({
 
     return (
       <Card
-        className={`task-card ${isDescriptionVisible || isHovering ? "highlighted-border" : "default-border"}`}
+        className={`task-card ${
+          isDescriptionVisible || isHovering ? "highlighted-border" : "default-border"
+        }`}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
         onClick={(e) => {
@@ -84,7 +89,7 @@ const RecoverDeletedTasks = ({
                 checked={task.completed ?? false}
                 className="custom-checkbox"
                 style={{ transform: "scale(1.5)", marginRight: "7px" }}
-                disabled // Non-functional in recovery view
+                disabled
               />
             </Col>
             <Col className="task-content">
@@ -130,6 +135,8 @@ const RecoverDeletedTasks = ({
             <Nav.Link
               eventKey={key}
               className={`subnav-link ${activeSection === key ? "active" : ""}`}
+              data-tooltip={sections[key].label}
+              data-tooltip-position="top"
             >
               {sections[key].label}
             </Nav.Link>
@@ -139,7 +146,9 @@ const RecoverDeletedTasks = ({
 
       <div className="recover-card-container">
         {currentItems.length === 0 ? (
-          <p className="empty-message">No {sections[activeSection].label.toLowerCase()} to recover.</p>
+          <p className="empty-message">
+            No {sections[activeSection].label.toLowerCase()} to recover.
+          </p>
         ) : (
           currentItems.map((task, index) => (
             <RecoverTaskItem task={task} index={index} key={index} />
@@ -152,8 +161,8 @@ const RecoverDeletedTasks = ({
         onClick={onBack}
         className="back-btn1"
         data-tooltip="Back"
-        aria-label="Back"
         data-tooltip-position="top"
+        aria-label="Back"
       >
         <IoChevronBackOutline />
       </Button>
